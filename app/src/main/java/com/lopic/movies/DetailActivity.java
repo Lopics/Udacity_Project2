@@ -43,7 +43,7 @@ public class DetailActivity extends AppCompatActivity {
         mTrailer = (Button) findViewById(R.id.trailer_button);
         mFav = (Button) findViewById(R.id.fav_button);
         Intent intentThatStartedThisActivity = getIntent();
-        String id= "";
+        String id = "";
 
         if (intentThatStartedThisActivity != null) {
             if (intentThatStartedThisActivity.hasExtra("movie")) {
@@ -57,28 +57,26 @@ public class DetailActivity extends AppCompatActivity {
             }
 
         }
-        BackgroundTask bgTask = new BackgroundTask(Integer.parseInt(id),this);
-        bgTask.getVideo(new Response.Listener<JSONObject>() {
+        /*Give Functionality to Trailer Button*/
+        BackgroundTask bgTask = new BackgroundTask(this, 'v' ,Integer.parseInt(id));
+        bgTask.getProduct(new Response.Listener<JSONObject>() {
             @Override
             public void onResponse(JSONObject response) {
                 if (response.length() > 0) {
-                    try {
-                        final String url = "https://www.youtube.com/watch?v=" + OpenJsonUtils.getVideoFromJson(response.toString());
-                        mTrailer.setOnClickListener(new View.OnClickListener() {
-                            public void onClick(View v) {
-                                startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse(url)));
-                            }
-                        });
-                    } catch (Exception e) {
+                    final String url = "https://www.youtube.com/watch?v=" + OpenJsonUtils.getVideoFromJson(response.toString());
+                    mTrailer.setOnClickListener(new View.OnClickListener() {
+                        public void onClick(View v) {
+                            startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse(url)));
+                        }
+                    });
 
-                    }
                 }
             }
-            }, new Response.ErrorListener() {
-                @Override
-                public void onErrorResponse(VolleyError error) {
-                    Log.d("ERROR", error.toString());
-                }
-            });
+        }, new Response.ErrorListener() {
+            @Override
+            public void onErrorResponse(VolleyError error) {
+                Log.d("ERROR", error.toString());
+            }
+        });
     }
 }

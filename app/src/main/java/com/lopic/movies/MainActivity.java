@@ -49,9 +49,9 @@ public class MainActivity extends AppCompatActivity {
 
     private void loadMovieData() {
         showDataView();
-        if(getPreference() == 1 || getPreference() == 0) {
+        if (getPreference() == 1 || getPreference() == 0) {
             volley();
-        }else if (getPreference() == 2){
+        } else if (getPreference() == 2) {
             displaySqlList();
         }
     }
@@ -64,27 +64,23 @@ public class MainActivity extends AppCompatActivity {
     private void volley() {
         BackgroundTask bgTask = new BackgroundTask(MainActivity.this, getPreference());
         bgTask.getProduct(new Response.Listener<JSONObject>() {
-                    @Override
-                    public void onResponse(JSONObject response) {
-                        if (response.length() > 0) {
-                            try {
-                                List<Movie> mResults = OpenJsonUtils
-                                        .getSimpleStringsFromJson(response.toString());
-                                mLoading.setVisibility(View.INVISIBLE);
-                                imageDisplay(mResults);
-                            } catch (Exception e) {
-                                showErrorMessage();
-                            }
-                        } else {
-                            showErrorMessage();
-                        }
-                    }
-                }, new Response.ErrorListener() {
-                    @Override
-                    public void onErrorResponse(VolleyError error) {
-                        Log.d("ERROR", error.toString());
-                    }
-                });
+            @Override
+            public void onResponse(JSONObject response) {
+                if (response.length() > 0) {
+                    List<Movie> mResults = OpenJsonUtils
+                            .getSimpleStringsFromJson(response.toString());
+                    mLoading.setVisibility(View.INVISIBLE);
+                    imageDisplay(mResults);
+                } else {
+                    showErrorMessage();
+                }
+            }
+        }, new Response.ErrorListener() {
+            @Override
+            public void onErrorResponse(VolleyError error) {
+                Log.d("ERROR", error.toString());
+            }
+        });
 
     }
 

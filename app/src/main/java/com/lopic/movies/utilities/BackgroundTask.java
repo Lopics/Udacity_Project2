@@ -1,10 +1,10 @@
 package com.lopic.movies.utilities;
 
 import android.content.Context;
+import android.widget.Switch;
 
 import com.android.volley.Response;
 import com.android.volley.toolbox.JsonObjectRequest;
-import com.lopic.movies.MainActivity;
 
 import org.json.JSONObject;
 
@@ -13,27 +13,36 @@ import static com.lopic.movies.utilities.NetworkUtils.buildUrl;
 public class BackgroundTask {
     private int mPref;
     private Context mContext;
-    private int id;
+    private static final String RATED_BASE_URL =
+            "https://api.themoviedb.org/3/movie/top_rated";
+    private static final String POPULAR_BASE_URL =
+            "https://api.themoviedb.org/3/movie/popular";
+    private static final String MOVIE_VIDEO_URL = "https://api.themoviedb.org/3/movie/";
+    private static String BASE_URL;
 
     public BackgroundTask(Context c, int p) {
         mContext = c;
-        mPref = p;
+        switch(p) {
+            case 0:
+                BASE_URL = RATED_BASE_URL;
+                break;
+            case 1:
+                BASE_URL = POPULAR_BASE_URL;
+        }
     }
 
-    public BackgroundTask(int i, Context c) {
+    public BackgroundTask(Context c, char p, int i) {
         mContext = c;
-        id = i+100;
+        switch (p){
+            case 'v':
+                BASE_URL = MOVIE_VIDEO_URL + (i) +"/videos";
+        }
     }
 
     public void getProduct(Response.Listener<JSONObject> listener,
                            Response.ErrorListener errlsn) {
-        JsonObjectRequest jsObjRequest = new JsonObjectRequest(buildUrl(mPref), null, listener, errlsn);
+        JsonObjectRequest jsObjRequest = new JsonObjectRequest(buildUrl(BASE_URL), null, listener, errlsn);
         MySingleton.getInstance(mContext).addToRequestQueue(jsObjRequest);
     }
 
-    public void getVideo(Response.Listener<JSONObject> listener,
-                         Response.ErrorListener errlsn) {
-        JsonObjectRequest jsObjRequest = new JsonObjectRequest(buildUrl(id), null, listener, errlsn);
-        MySingleton.getInstance(mContext).addToRequestQueue(jsObjRequest);
-    }
 }
