@@ -1,13 +1,24 @@
 package com.lopic.movies;
 
 import android.content.Intent;
+import android.net.Uri;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.View;
+import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import com.android.volley.Response;
+import com.android.volley.VolleyError;
+import com.lopic.movies.utilities.BackgroundTask;
+import com.lopic.movies.utilities.OpenJsonUtils;
 import com.squareup.picasso.Picasso;
+
+import org.json.JSONObject;
+
+import java.util.List;
 
 public class DetailActivity extends AppCompatActivity {
 
@@ -16,6 +27,8 @@ public class DetailActivity extends AppCompatActivity {
     TextView mRelease_Date;
     TextView mVote_AVG;
     ImageView mImageView;
+    Button mTrailer;
+    Button mFav;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -27,9 +40,10 @@ public class DetailActivity extends AppCompatActivity {
         mOverview = (TextView) findViewById(R.id.overview);
         mRelease_Date = (TextView) findViewById(R.id.release_date);
         mVote_AVG = (TextView) findViewById(R.id.vote_avg);
-
-
+        mTrailer = (Button) findViewById(R.id.trailer_button);
+        mFav = (Button) findViewById(R.id.fav_button);
         Intent intentThatStartedThisActivity = getIntent();
+        String id= "";
 
         if (intentThatStartedThisActivity != null) {
             if (intentThatStartedThisActivity.hasExtra("movie")) {
@@ -39,7 +53,32 @@ public class DetailActivity extends AppCompatActivity {
                 mOverview.setText(movie[2]);
                 mVote_AVG.setText(movie[3] + " / 10");
                 mRelease_Date.setText(movie[4]);
+                id = movie[5];
             }
+
         }
+        BackgroundTask bgTask = new BackgroundTask(Integer.parseInt(id),this);
+        bgTask.getVideo(new Response.Listener<JSONObject>() {
+            @Override
+            public void onResponse(JSONObject response) {
+                if (response.length() > 0) {
+                    try {
+                        final String url = "https://www.youtube.com/watch?v=" + OpenJsonUtils.getVideoFromJson(response.toString());
+                        mTrailer.setOnClickListener(new View.OnClickListener() {
+                            public void onClick(View v) {
+                                startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse(url)));
+                            }
+                        });
+                    } catch (Exception e) {
+
+                    }
+                }
+            }
+            }, new Response.ErrorListener() {
+                @Override
+                public void onErrorResponse(VolleyError error) {
+                    Log.d("ERROR", error.toString());
+                }
+            });
     }
 }

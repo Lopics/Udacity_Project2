@@ -1,6 +1,7 @@
 package com.lopic.movies.utilities;
 
 import android.net.Uri;
+import android.util.Log;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -19,11 +20,13 @@ public final class NetworkUtils {
     private static final String API_KEY = "e5eb3c60e02416db4ede9ebb0e9b2906";
     private static final String API_PARAM = "api_key";
 
-    public static URL buildUrl(boolean URL) {
-        if (URL == true) {
+    public static String buildUrl(int URL) {
+        if (URL == 0) {
             BASE_URL = RATED_BASE_URL;
-        } else {
+        }else if (URL == 1) {
             BASE_URL = POPULAR_BASE_URL;
+        }else {
+            BASE_URL = "https://api.themoviedb.org/3/movie/"+ (URL-100) +"/videos";
         }
         Uri builtUri = Uri.parse(BASE_URL).buildUpon()
                 .appendQueryParameter(API_PARAM, API_KEY)
@@ -36,26 +39,6 @@ public final class NetworkUtils {
             e.printStackTrace();
         }
 
-
-        return url;
-    }
-
-    public static String getResponseFromHttpUrl(URL url) throws IOException {
-        HttpURLConnection urlConnection = (HttpURLConnection) url.openConnection();
-        try {
-            InputStream in = urlConnection.getInputStream();
-
-            Scanner scanner = new Scanner(in);
-            scanner.useDelimiter("\\A");
-
-            boolean hasInput = scanner.hasNext();
-            if (hasInput) {
-                return scanner.next();
-            } else {
-                return null;
-            }
-        } finally {
-            urlConnection.disconnect();
-        }
+        return url.toString();
     }
 }

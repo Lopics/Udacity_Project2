@@ -4,10 +4,10 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
-import android.os.AsyncTask;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
@@ -17,79 +17,75 @@ import android.widget.GridView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 
-import com.lopic.movies.utilities.NetworkUtils;
+import com.android.volley.Request;
+import com.android.volley.Response;
+import com.android.volley.VolleyError;
+import com.android.volley.toolbox.JsonObjectRequest;
+import com.lopic.movies.utilities.BackgroundTask;
+import com.lopic.movies.utilities.MySingleton;
 import com.lopic.movies.utilities.OpenJsonUtils;
 
-import java.net.URL;
+import org.json.JSONObject;
+
 import java.util.List;
+
+import static com.lopic.movies.utilities.NetworkUtils.buildUrl;
 
 public class MainActivity extends AppCompatActivity {
 
     private GridView gridview;
-
     private TextView mErrorMessageDisplay;
-
-    private ProgressBar mLoadingIndicator;
+    private ProgressBar mLoading;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         mErrorMessageDisplay = (TextView) findViewById(R.id.tv_error_message_display);
-        mLoadingIndicator = (ProgressBar) findViewById(R.id.pb_loading_indicator);
+        mLoading = (ProgressBar) findViewById(R.id.pb_loading_indicator);
         gridview = (GridView) findViewById(R.id.gridview);
         loadMovieData();
     }
 
     private void loadMovieData() {
         showDataView();
-        new FetchMovieData().execute();
+        if(getPreference() == 1 || getPreference() == 0) {
+            volley();
+        }else if (getPreference() == 2){
+            displaySqlList();
+        }
     }
 
-    private void showDataView() {
-        gridview.setVisibility(View.VISIBLE);
-        mErrorMessageDisplay.setVisibility(View.INVISIBLE);
+    private void displaySqlList() {
+
     }
 
-    private void showErrorMessage() {
-        gridview.setVisibility(View.INVISIBLE);
-        mErrorMessageDisplay.setVisibility(View.VISIBLE);
-    }
 
-    public class FetchMovieData extends AsyncTask<Void, Void, List<Movie>> {
+    private void volley() {
+        BackgroundTask bgTask = new BackgroundTask(MainActivity.this, getPreference());
+        bgTask.getProduct(new Response.Listener<JSONObject>() {
+                    @Override
+                    public void onResponse(JSONObject response) {
+                        if (response.length() > 0) {
+                            try {
+                                List<Movie> mResults = OpenJsonUtils
+                                        .getSimpleStringsFromJson(response.toString());
+                                mLoading.setVisibility(View.INVISIBLE);
+                                imageDisplay(mResults);
+                            } catch (Exception e) {
+                                showErrorMessage();
+                            }
+                        } else {
+                            showErrorMessage();
+                        }
+                    }
+                }, new Response.ErrorListener() {
+                    @Override
+                    public void onErrorResponse(VolleyError error) {
+                        Log.d("ERROR", error.toString());
+                    }
+                });
 
-        @Override
-        protected void onPreExecute() {
-            super.onPreExecute();
-            mLoadingIndicator.setVisibility(View.VISIBLE);
-        }
-
-        @Override
-        protected List<Movie> doInBackground(Void... params) {
-
-            boolean options = getPreference();
-            URL RequestUrl = NetworkUtils.buildUrl(options);
-
-            try {
-                String jsonResponse = NetworkUtils
-                        .getResponseFromHttpUrl(RequestUrl);
-
-                List<Movie> simpleJsonData = OpenJsonUtils
-                        .getSimpleStringsFromJson(jsonResponse);
-
-                return simpleJsonData;
-
-            } catch (Exception e) {
-                e.printStackTrace();
-                return null;
-            }
-        }
-
-        @Override
-        protected void onPostExecute(List<Movie> results) {
-            mLoadingIndicator.setVisibility(View.INVISIBLE);
-            imageDisplay(results);
-        }
     }
 
     private void imageDisplay(final List<Movie> results) {
@@ -106,24 +102,6 @@ public class MainActivity extends AppCompatActivity {
         } else {
             showErrorMessage();
         }
-    }
-
-    private void popup() {
-        CharSequence colors[] = new CharSequence[]{"Most Popular", "Top Rated"};
-        AlertDialog.Builder builder = new AlertDialog.Builder(this);
-        builder.setTitle("Sort By");
-        builder.setItems(colors, new DialogInterface.OnClickListener() {
-            @Override
-            public void onClick(DialogInterface dialog, int which) {
-                if (which == 0) {
-                    setPreference(false);
-                } else if (which == 1) {
-                    setPreference(true);
-                }
-                loadMovieData();
-            }
-        });
-        builder.show();
     }
 
     @Override
@@ -148,18 +126,48 @@ public class MainActivity extends AppCompatActivity {
 
     }
 
-    private void setPreference(boolean b) {
+    private void popup() {
+        CharSequence colors[] = new CharSequence[]{"Most Popular", "Top Rated", "Favourate"};
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        builder.setTitle("Sort By");
+        builder.setItems(colors, new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                if (which == 0) {
+                    setPreference(0);
+                } else if (which == 1) {
+                    setPreference(1);
+                } else if (which == 2) {
+                    setPreference(2);
+                }
+                loadMovieData();
+            }
+        });
+        builder.show();
+    }
+
+    private void setPreference(int b) {
         SharedPreferences sharedPref = getSharedPreferences("MoviesApp", Context.MODE_PRIVATE);
 
         SharedPreferences.Editor editor = sharedPref.edit();
-        editor.putBoolean("SortBy", b);
+        editor.putInt("SortBy", b);
         editor.apply();
     }
 
-    private boolean getPreference() {
+    private int getPreference() {
         SharedPreferences sharedPref = getSharedPreferences("MoviesApp", Context.MODE_PRIVATE);
-
-        return sharedPref.getBoolean("SortBy", true);
+        return sharedPref.getInt("SortBy", 0);
     }
+
+    private void showDataView() {
+        gridview.setVisibility(View.VISIBLE);
+        mErrorMessageDisplay.setVisibility(View.INVISIBLE);
+    }
+
+    private void showErrorMessage() {
+        gridview.setVisibility(View.INVISIBLE);
+        mErrorMessageDisplay.setVisibility(View.VISIBLE);
+    }
+
 }
 

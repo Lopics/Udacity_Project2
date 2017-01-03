@@ -40,7 +40,6 @@ public class ImageAdapter extends BaseAdapter {
         } else {
             imageView = (ImageView) convertView;
         }
-        Picasso.with(mContext).setLoggingEnabled(true);
         Picasso.with(mContext).load(mMovie.get(position).getPoster()).placeholder(R.drawable.placeholder).into(imageView);
         return imageView;
     }

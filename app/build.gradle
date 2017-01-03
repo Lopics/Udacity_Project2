@@ -30,4 +30,5 @@ dependencies {
         mavenCentral()
     }
     compile 'com.squareup.picasso:picasso:2.5.2'
+    compile 'com.mcxiaoke.volley:library:1.0.19'
 }

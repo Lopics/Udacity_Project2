@@ -22,6 +22,5 @@
         android:id="@+id/pb_loading_indicator"
         android:layout_width="42dp"
         android:layout_height="42dp"
-        android:layout_gravity="center"
-        android:visibility="invisible" />
+        android:layout_gravity="center" />
 </FrameLayout>
