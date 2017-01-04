@@ -18,6 +18,7 @@ public class BackgroundTask {
     private static final String POPULAR_BASE_URL =
             "https://api.themoviedb.org/3/movie/popular";
     private static final String MOVIE_VIDEO_URL = "https://api.themoviedb.org/3/movie/";
+    private static final String MOVIE_DETAIL = "https://api.themoviedb.org/3/movie/";
     private static String BASE_URL;
 
     public BackgroundTask(Context c, int p) {
@@ -28,14 +29,18 @@ public class BackgroundTask {
                 break;
             case 1:
                 BASE_URL = POPULAR_BASE_URL;
+                break;
         }
     }
 
-    public BackgroundTask(Context c, char p, int i) {
+    public BackgroundTask(Context c, int p, int i) {
         mContext = c;
         switch (p){
-            case 'v':
+            case 1:
                 BASE_URL = MOVIE_VIDEO_URL + (i) +"/videos";
+                break;
+            case 2:
+                BASE_URL = MOVIE_DETAIL + i;
         }
     }
 

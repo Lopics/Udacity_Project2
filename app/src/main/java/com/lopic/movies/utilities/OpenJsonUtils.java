@@ -1,5 +1,7 @@
 package com.lopic.movies.utilities;
 
+import android.util.Log;
+
 import com.lopic.movies.Movie;
 
 import org.json.JSONArray;
@@ -11,17 +13,18 @@ import java.util.ArrayList;
 import java.util.List;
 
 public final class OpenJsonUtils {
-
+    private static final String OWM_LIST = "results";
+    private static final String OWM_OT = "original_title";
+    private static final String OWM_OV = "overview";
+    private static final String OWM_VA = "vote_average";
+    private static final String OWM_ID = "id";
+    private static final String OWM_RD = "release_date";
+    private static final String OWM_POSTER = "poster_path";
+    private static final String OWM_KY = "key";
 
 
     public static List<Movie> getSimpleStringsFromJson(String JsonStr) {
-         final String OWM_LIST = "results";
-         final String OWM_OT = "original_title";
-         final String OWM_OV = "overview";
-         final String OWM_VA = "vote_average";
-         final String OWM_ID = "id";
-         final String OWM_RD = "release_date";
-         final String OWM_POSTER = "poster_path";
+
         try {
             List<Movie> movies = new ArrayList<Movie>();
             JSONObject Json = new JSONObject(JsonStr);
@@ -40,7 +43,7 @@ public final class OpenJsonUtils {
                 id = data_movie.getString(OWM_ID);
                 vote_average = data_movie.getString(OWM_VA);
                 release_date = data_movie.getString(OWM_RD);
-                movies.add(new Movie( original_title, poster, overview, vote_average, release_date, id));
+                movies.add(new Movie(original_title, poster, overview, vote_average, release_date, id));
             }
             return movies;
         } catch (Exception e) {
@@ -50,8 +53,7 @@ public final class OpenJsonUtils {
     }
 
     public static String getVideoFromJson(String JsonStr) {
-        final String OWM_LIST = "results";
-         final String OWM_KY = "key";
+
         try {
             JSONObject Json = new JSONObject(JsonStr);
 
@@ -62,5 +64,32 @@ public final class OpenJsonUtils {
             return null;
         }
 
+    }
+
+    public static Movie getOneMovie(String JsonStr) {
+        try {
+            Movie movies;
+            JSONObject Json = new JSONObject(JsonStr);
+
+            String original_title;
+            String poster;
+            String overview;
+            String vote_average;
+            String release_date;
+            String id;
+
+            original_title = Json.getString(OWM_OT);
+            poster = "http://image.tmdb.org/t/p/w185" + Json.getString(OWM_POSTER);
+            overview = Json.getString(OWM_OV);
+            id = Json.getString(OWM_ID);
+            vote_average = Json.getString(OWM_VA);
+            release_date = Json.getString(OWM_RD);
+            movies = new Movie(original_title, poster, overview, vote_average, release_date, id);
+
+            return movies;
+        } catch (Exception e) {
+            Log.v("JSON:", "NOT WORKING!");
+            return null;
+        }
     }
 }

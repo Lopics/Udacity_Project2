@@ -4,6 +4,8 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.database.Cursor;
+import android.database.sqlite.SQLiteDatabase;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -21,12 +23,16 @@ import com.android.volley.Request;
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.JsonObjectRequest;
+import com.lopic.movies.data.Favourites;
+import com.lopic.movies.data.FavouritesDbHelper;
 import com.lopic.movies.utilities.BackgroundTask;
 import com.lopic.movies.utilities.MySingleton;
 import com.lopic.movies.utilities.OpenJsonUtils;
 
 import org.json.JSONObject;
 
+import java.util.ArrayList;
+import java.util.EmptyStackException;
 import java.util.List;
 
 import static com.lopic.movies.utilities.NetworkUtils.buildUrl;
@@ -35,14 +41,25 @@ public class MainActivity extends AppCompatActivity {
 
     private GridView gridview;
     private TextView mErrorMessageDisplay;
+    private TextView mErrorMessageFav;
     private ProgressBar mLoading;
+    private SQLiteDatabase mDB;
+    private FavouritesDbHelper dbHelper;
 
+    @Override
+    protected void onDestroy(){
+        super.onDestroy();
+        mDB.close();
+    }
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+        dbHelper = new FavouritesDbHelper(this);
+        mDB = dbHelper.getReadableDatabase();
         mErrorMessageDisplay = (TextView) findViewById(R.id.tv_error_message_display);
         mLoading = (ProgressBar) findViewById(R.id.pb_loading_indicator);
+        mErrorMessageFav = (TextView) findViewById(R.id.tv_error_message_fav);
         gridview = (GridView) findViewById(R.id.gridview);
         loadMovieData();
     }
@@ -58,8 +75,55 @@ public class MainActivity extends AppCompatActivity {
 
     private void displaySqlList() {
 
+        List<Integer> favMovies = getDataFromSQL();
+        if (!favMovies.isEmpty()) {
+            final List<Movie> mResults = new ArrayList<Movie>();
+            for (int i = 0; i < favMovies.size(); i++) {
+                BackgroundTask bgTask = new BackgroundTask(MainActivity.this, getPreference(),favMovies.get(i));
+                bgTask.getProduct(new Response.Listener<JSONObject>() {
+                    @Override
+                    public void onResponse(JSONObject response) {
+                        if (response.length() > 0) {
+                            mResults.add(OpenJsonUtils.getOneMovie(response.toString()));
+                            imageDisplay(mResults);
+                        } else {
+                            showErrorMessage();
+                        }
+                    }
+                }, new Response.ErrorListener() {
+                    @Override
+                    public void onErrorResponse(VolleyError error) {
+                        Log.d("ERROR", error.toString());
+                    }
+                });
+            }
+            mLoading.setVisibility(View.INVISIBLE);
+            Log.d("ERROR", ""+mResults.size());
+
+        }
     }
 
+    public interface VolleyCallback{
+        void onSuccess(String result);
+    }
+
+    private List<Integer> getDataFromSQL() {
+        List<Integer> movieID = new ArrayList<Integer>();
+        Cursor cursor = mDB.query(Favourites.FavouritesList.TABLE_NAME, null,
+                null, null, null, null, Favourites.FavouritesList.Movie_ID);
+        if (cursor.getCount() == 0) {
+            mLoading.setVisibility(View.INVISIBLE);
+            mErrorMessageFav.setVisibility(View.VISIBLE);
+            Log.v("FILES:", "SIZE:" + cursor.getCount());
+            return movieID;
+        }
+        cursor.moveToFirst();
+        while (!cursor.isAfterLast()) {
+            movieID.add(cursor.getInt(cursor.getColumnIndex(Favourites.FavouritesList.Movie_ID)));
+            cursor.moveToNext();
+        }
+        return movieID;
+    }
 
     private void volley() {
         BackgroundTask bgTask = new BackgroundTask(MainActivity.this, getPreference());
@@ -85,7 +149,8 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void imageDisplay(final List<Movie> results) {
-        if (results != null) {
+        if (!results.isEmpty()) {
+            Log.d("ERROR", "HI" + results.size());
             gridview.setAdapter(new ImageAdapter(MainActivity.this, results));
             gridview.setOnItemClickListener(new AdapterView.OnItemClickListener() {
                 public void onItemClick(AdapterView<?> parent, View v,
@@ -158,12 +223,14 @@ public class MainActivity extends AppCompatActivity {
     private void showDataView() {
         gridview.setVisibility(View.VISIBLE);
         mErrorMessageDisplay.setVisibility(View.INVISIBLE);
+        mErrorMessageFav.setVisibility(View.INVISIBLE);
     }
 
     private void showErrorMessage() {
         gridview.setVisibility(View.INVISIBLE);
         mErrorMessageDisplay.setVisibility(View.VISIBLE);
     }
+
 
 }
 
