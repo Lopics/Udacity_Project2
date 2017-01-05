@@ -111,6 +111,7 @@
         android:layout_height="wrap_content"
         android:layout_gravity="bottom|end"
         android:src="@drawable/ic_favorite_border_white_24px"
-        android:clickable="true"/>
+        android:clickable="true"
+        android:onClick="yourMethod"/>
 
 </android.support.design.widget.CoordinatorLayout>

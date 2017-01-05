@@ -100,7 +100,6 @@ public class MainActivity extends AppCompatActivity {
                 });
             }
             mLoading.setVisibility(View.INVISIBLE);
-            Log.d("ERROR", ""+mResults.size());
 
         }
     }
@@ -112,7 +111,6 @@ public class MainActivity extends AppCompatActivity {
         if (cursor.getCount() == 0) {
             mLoading.setVisibility(View.INVISIBLE);
             mErrorMessageFav.setVisibility(View.VISIBLE);
-            Log.v("FILES:", "SIZE:" + cursor.getCount());
             return movieID;
         }
         cursor.moveToFirst();
@@ -148,7 +146,6 @@ public class MainActivity extends AppCompatActivity {
 
     private void imageDisplay(final List<Movie> results) {
         if (!results.isEmpty()) {
-            Log.d("ERROR", "HI" + results.size());
             gridview.setAdapter(new ImageAdapter(MainActivity.this, results));
             gridview.setOnItemClickListener(new AdapterView.OnItemClickListener() {
                 public void onItemClick(AdapterView<?> parent, View v,

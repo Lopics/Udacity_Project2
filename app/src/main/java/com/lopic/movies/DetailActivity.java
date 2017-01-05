@@ -44,6 +44,7 @@ public class DetailActivity extends AppCompatActivity {
     FavouritesDbHelper dbHelper;
     FloatingActionButton myFab;
 
+
     @Override
     protected void onDestroy() {
         super.onDestroy();
@@ -54,7 +55,6 @@ public class DetailActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_detail);
-
         dbHelper = new FavouritesDbHelper(this);
         mDB = dbHelper.getReadableDatabase();
         mTitle = (TextView) findViewById(R.id.original_title);
@@ -63,6 +63,7 @@ public class DetailActivity extends AppCompatActivity {
         mRelease_Date = (TextView) findViewById(R.id.release_date);
         mVote_AVG = (TextView) findViewById(R.id.vote_avg);
         mTrailer = (Button) findViewById(R.id.trailer_button);
+        myFab = (FloatingActionButton) findViewById(R.id.fav_button);
         Intent intentThatStartedThisActivity = getIntent();
 
 
@@ -78,14 +79,16 @@ public class DetailActivity extends AppCompatActivity {
             }
 
         }
-
-        FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fav_button);
-
-        fab.setOnClickListener(new View.OnClickListener() {
+        changeFavImage(id);
+        myFab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-
-                Log.v("CLICKED","");
+                if(!isFav(id)) {
+                    addToFav(id);
+                }else{
+                    deleteFav(id);
+                }
+                changeFavImage(id);
             }
         });
 
@@ -113,62 +116,36 @@ public class DetailActivity extends AppCompatActivity {
 
     }
 
-    /*@Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        MenuInflater inflater = getMenuInflater();
-        inflater.inflate(R.menu.fav_menu, menu);
-        mMenu = menu;
-        changeFavImage();
-        return true;
-    }
 
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
 
-        switch (item.getItemId()) {
-            case R.id.action_fav:
-                if(!isFav()) {
-                    addToFav();
-                }else{
-                    deleteFav();
-                }
-                changeFavImage();
-                return true;
-            default:
-                return super.onOptionsItemSelected(item);
-        }
-
-    }*/
-
-    private void deleteFav() {
-        mDB.delete(Favourites.FavouritesList.TABLE_NAME, Favourites.FavouritesList.Movie_ID + "=" + id,
+    private void deleteFav(int i) {
+        mDB.delete(Favourites.FavouritesList.TABLE_NAME, Favourites.FavouritesList.Movie_ID + "=" + i,
                 null);
     }
 
-    private long addToFav() {
+    private long addToFav(int i) {
         ContentValues cv = new ContentValues();
-        cv.put(Favourites.FavouritesList.Movie_ID, id);
+        cv.put(Favourites.FavouritesList.Movie_ID, i);
         return mDB.insert(Favourites.FavouritesList.TABLE_NAME, null, cv);
     }
 
-    private boolean isFav() {
-        Cursor cursor = mDB.query(Favourites.FavouritesList.TABLE_NAME, new String[] {Favourites.FavouritesList.Movie_ID + "=" + id},
-                null, null, null, null, Favourites.FavouritesList.Movie_ID);
+    private boolean isFav(int i) {
+        Cursor cursor = mDB.query(Favourites.FavouritesList.TABLE_NAME, new String[] {Favourites.FavouritesList.Movie_ID },
+                Favourites.FavouritesList.Movie_ID + "=" + i, null, null, null, null);
+        Log.v("CHNAGE", ""+ cursor.getCount()+ " COUNT " + i);
         if (cursor.getCount() > 0) {
             return true;
         }
         return false;
     }
 
-    private void changeFavImage(){
-        if(isFav() == true){
-            mMenu.findItem(R.id.action_fav).setIcon(R.drawable.ic_favorite_black_24px);
-        }else{
-            mMenu.findItem(R.id.action_fav).setIcon(R.drawable.ic_favorite_border_white_24px);
+    private void changeFavImage(int i){
+        if(isFav(i)){
+            myFab.setImageResource(R.drawable.ic_favorite_black_24px);
+        }else if ((!isFav(i))){
+            myFab.setImageResource(R.drawable.ic_favorite_border_white_24px);
 
         }
     }
-
-
 
 }
