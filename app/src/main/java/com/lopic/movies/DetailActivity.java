@@ -9,12 +9,10 @@ import android.support.design.widget.FloatingActionButton;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
-import android.view.Menu;
-import android.view.MenuInflater;
-import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
 import android.widget.ImageView;
+import android.widget.ListView;
 import android.widget.TextView;
 
 import com.android.volley.Response;
@@ -28,17 +26,16 @@ import com.squareup.picasso.Picasso;
 import org.json.JSONObject;
 
 import java.util.ArrayList;
-import java.util.List;
 
 public class DetailActivity extends AppCompatActivity {
-
+    ListView listView;
+    TextView mErrorMessage;
     TextView mTitle;
     TextView mOverview;
     TextView mRelease_Date;
     TextView mVote_AVG;
     ImageView mImageView;
     Button mTrailer;
-    Menu mMenu;
     int id = 0;
     SQLiteDatabase mDB;
     FavouritesDbHelper dbHelper;
@@ -64,6 +61,8 @@ public class DetailActivity extends AppCompatActivity {
         mVote_AVG = (TextView) findViewById(R.id.vote_avg);
         mTrailer = (Button) findViewById(R.id.trailer_button);
         myFab = (FloatingActionButton) findViewById(R.id.fav_button);
+        listView = (ListView) findViewById(R.id.review_list);
+        mErrorMessage = (TextView) findViewById(R.id.error_message_review);
         Intent intentThatStartedThisActivity = getIntent();
 
 
@@ -83,9 +82,9 @@ public class DetailActivity extends AppCompatActivity {
         myFab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                if(!isFav(id)) {
+                if (!isFav(id)) {
                     addToFav(id);
-                }else{
+                } else {
                     deleteFav(id);
                 }
                 changeFavImage(id);
@@ -114,9 +113,31 @@ public class DetailActivity extends AppCompatActivity {
             }
         });
 
+        BackgroundTask bgTask1 = new BackgroundTask(this, 3, id);
+        bgTask.getProduct(new Response.Listener<JSONObject>() {
+            @Override
+            public void onResponse(JSONObject response) {
+                if (response.length() > 0) {
+                    ArrayList<Review> reviews = OpenJsonUtils.getReviews(response.toString());
+                    ReviewAdapter adapter = new ReviewAdapter(DetailActivity.this, reviews);
+                    listView.setAdapter(adapter);
+                } else {
+                    showerrorMessage();
+                }
+            }
+        }, new Response.ErrorListener() {
+            @Override
+            public void onErrorResponse(VolleyError error) {
+                Log.d("ERROR", error.toString());
+            }
+        });
     }
 
 
+    private void showerrorMessage() {
+        listView.setVisibility(View.INVISIBLE);
+        mErrorMessage.setVisibility(View.VISIBLE);
+    }
 
     private void deleteFav(int i) {
         mDB.delete(Favourites.FavouritesList.TABLE_NAME, Favourites.FavouritesList.Movie_ID + "=" + i,
@@ -130,19 +151,19 @@ public class DetailActivity extends AppCompatActivity {
     }
 
     private boolean isFav(int i) {
-        Cursor cursor = mDB.query(Favourites.FavouritesList.TABLE_NAME, new String[] {Favourites.FavouritesList.Movie_ID },
+        Cursor cursor = mDB.query(Favourites.FavouritesList.TABLE_NAME, new String[]{Favourites.FavouritesList.Movie_ID},
                 Favourites.FavouritesList.Movie_ID + "=" + i, null, null, null, null);
-        Log.v("CHNAGE", ""+ cursor.getCount()+ " COUNT " + i);
+        Log.v("CHNAGE", "" + cursor.getCount() + " COUNT " + i);
         if (cursor.getCount() > 0) {
             return true;
         }
         return false;
     }
 
-    private void changeFavImage(int i){
-        if(isFav(i)){
+    private void changeFavImage(int i) {
+        if (isFav(i)) {
             myFab.setImageResource(R.drawable.ic_favorite_black_24px);
-        }else if ((!isFav(i))){
+        } else if ((!isFav(i))) {
             myFab.setImageResource(R.drawable.ic_favorite_border_white_24px);
 
         }

@@ -3,6 +3,7 @@ package com.lopic.movies.utilities;
 import android.util.Log;
 
 import com.lopic.movies.Movie;
+import com.lopic.movies.Review;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -21,7 +22,8 @@ public final class OpenJsonUtils {
     private static final String OWM_RD = "release_date";
     private static final String OWM_POSTER = "poster_path";
     private static final String OWM_KY = "key";
-
+    private static final String OWM_AU = "author";
+    private static final String OWM_CO = "content";
 
     public static List<Movie> getSimpleStringsFromJson(String JsonStr) {
 
@@ -61,6 +63,7 @@ public final class OpenJsonUtils {
             JSONObject data_movie = Array.getJSONObject(0);
             return data_movie.getString(OWM_KY);
         } catch (Exception e) {
+            Log.v("JSON:", "NOT WORKING!");
             return null;
         }
 
@@ -87,6 +90,26 @@ public final class OpenJsonUtils {
             movies = new Movie(original_title, poster, overview, vote_average, release_date, id);
 
             return movies;
+        } catch (Exception e) {
+            Log.v("JSON:", "NOT WORKING!");
+            return null;
+        }
+    }
+
+    public static ArrayList<Review> getReviews(String JsonStr) {
+        try {
+            ArrayList<Review> reviews = new ArrayList<Review>();
+            JSONObject Json = new JSONObject(JsonStr);
+            JSONArray Array = Json.getJSONArray(OWM_LIST);
+            for (int i = 0; i < Array.length(); i++) {
+                String author;
+                String review;
+                JSONObject data_movie = Array.getJSONObject(i);
+                author = data_movie.getString(OWM_AU);
+                review = data_movie.getString(OWM_CO);
+                reviews.add(new Review(author, review));
+            }
+            return reviews;
         } catch (Exception e) {
             Log.v("JSON:", "NOT WORKING!");
             return null;

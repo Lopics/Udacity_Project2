@@ -19,23 +19,18 @@ import android.widget.GridView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 
-import com.android.volley.Request;
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
-import com.android.volley.toolbox.JsonObjectRequest;
 import com.lopic.movies.data.Favourites;
 import com.lopic.movies.data.FavouritesDbHelper;
 import com.lopic.movies.utilities.BackgroundTask;
-import com.lopic.movies.utilities.MySingleton;
 import com.lopic.movies.utilities.OpenJsonUtils;
 
 import org.json.JSONObject;
 
 import java.util.ArrayList;
-import java.util.EmptyStackException;
 import java.util.List;
 
-import static com.lopic.movies.utilities.NetworkUtils.buildUrl;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -183,10 +178,10 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void popup() {
-        CharSequence colors[] = new CharSequence[]{"Most Popular", "Top Rated", "Favourate"};
+        CharSequence options[] = new CharSequence[]{"Most Popular", "Top Rated", "Favourate"};
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
         builder.setTitle("Sort By");
-        builder.setItems(colors, new DialogInterface.OnClickListener() {
+        builder.setItems(options, new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int which) {
                 if (which == 0) {

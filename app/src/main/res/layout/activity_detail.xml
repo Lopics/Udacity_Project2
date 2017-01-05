@@ -3,17 +3,18 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context="com.lopic.movies.DetailActivity">
-
+    android:fitsSystemWindows="true">
 
     <android.support.v4.widget.NestedScrollView
         android:id="@+id/activity_detail"
         android:layout_width="match_parent"
-        android:layout_height="match_parent">
+        android:layout_height="wrap_content"
+        android:fillViewport="true"
+        tools:context="com.lopic.movies.DetailActivity">
 
         <LinearLayout
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
+            android:layout_height="fill_parent"
             android:orientation="vertical">
 
             <TextView
@@ -71,7 +72,7 @@
                     <LinearLayout
                         android:layout_width="fill_parent"
                         android:layout_height="wrap_content"
-                        android:orientation="horizontal">
+                        android:orientation="vertical">
 
                         <Button
                             android:id="@+id/trailer_button"
@@ -102,6 +103,37 @@
                     android:layout_height="wrap_content"
                     android:textAppearance="@style/TextAppearance.AppCompat.Body1" />
             </LinearLayout>
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:paddingLeft="5dp"
+                android:text="Reviews"
+                android:textAppearance="@android:style/TextAppearance.Medium" />
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical">
+
+
+                <ListView
+                    android:id="@+id/review_list"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    tools:context="com.lopic.movies.ReviewActivity" />
+
+                <TextView
+                    android:id="@+id/error_message_review"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:padding="16dp"
+                    android:text="There are no reviews on this movie"
+                    android:textSize="14sp"
+                    android:visibility="invisible" />
+            </LinearLayout>
+
         </LinearLayout>
     </android.support.v4.widget.NestedScrollView>
 
@@ -110,8 +142,10 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="bottom|end"
-        android:src="@drawable/ic_favorite_border_white_24px"
         android:clickable="true"
-        android:onClick="yourMethod"/>
-
+        android:onClick="yourMethod"
+        android:layout_marginBottom="10dp"
+        android:layout_marginRight="10dp"
+        android:src="@drawable/ic_favorite_border_white_24px" />
 </android.support.design.widget.CoordinatorLayout>
+

@@ -11,14 +11,12 @@ import org.json.JSONObject;
 import static com.lopic.movies.utilities.NetworkUtils.buildUrl;
 
 public class BackgroundTask {
-    private int mPref;
     private Context mContext;
     private static final String RATED_BASE_URL =
             "https://api.themoviedb.org/3/movie/top_rated";
     private static final String POPULAR_BASE_URL =
             "https://api.themoviedb.org/3/movie/popular";
-    private static final String MOVIE_VIDEO_URL = "https://api.themoviedb.org/3/movie/";
-    private static final String MOVIE_DETAIL = "https://api.themoviedb.org/3/movie/";
+    private static final String MOVIE_STARTER = "https://api.themoviedb.org/3/movie/";
     private static String BASE_URL;
 
     public BackgroundTask(Context c, int p) {
@@ -37,10 +35,14 @@ public class BackgroundTask {
         mContext = c;
         switch (p){
             case 1:
-                BASE_URL = MOVIE_VIDEO_URL + (i) +"/videos";
+                BASE_URL = MOVIE_STARTER + (i) +"/videos";
                 break;
             case 2:
-                BASE_URL = MOVIE_DETAIL + i;
+                BASE_URL = MOVIE_STARTER + i;
+                break;
+            case 3:
+                BASE_URL = MOVIE_STARTER + i + "/reviews";
+                break;
         }
     }
 
