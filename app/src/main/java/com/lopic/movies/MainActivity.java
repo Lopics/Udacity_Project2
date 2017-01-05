@@ -75,17 +75,19 @@ public class MainActivity extends AppCompatActivity {
 
     private void displaySqlList() {
 
-        List<Integer> favMovies = getDataFromSQL();
+        final List<Integer> favMovies = getDataFromSQL();
         if (!favMovies.isEmpty()) {
             final List<Movie> mResults = new ArrayList<Movie>();
             for (int i = 0; i < favMovies.size(); i++) {
                 BackgroundTask bgTask = new BackgroundTask(MainActivity.this, getPreference(),favMovies.get(i));
+                final int finalI = i;
                 bgTask.getProduct(new Response.Listener<JSONObject>() {
                     @Override
                     public void onResponse(JSONObject response) {
                         if (response.length() > 0) {
                             mResults.add(OpenJsonUtils.getOneMovie(response.toString()));
-                            imageDisplay(mResults);
+                            if(finalI +1 == favMovies.size())
+                                imageDisplay(mResults);
                         } else {
                             showErrorMessage();
                         }
@@ -101,10 +103,6 @@ public class MainActivity extends AppCompatActivity {
             Log.d("ERROR", ""+mResults.size());
 
         }
-    }
-
-    public interface VolleyCallback{
-        void onSuccess(String result);
     }
 
     private List<Integer> getDataFromSQL() {

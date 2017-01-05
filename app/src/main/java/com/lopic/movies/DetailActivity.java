@@ -5,6 +5,7 @@ import android.content.Intent;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.net.Uri;
+import android.support.design.widget.FloatingActionButton;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
@@ -41,6 +42,7 @@ public class DetailActivity extends AppCompatActivity {
     int id = 0;
     SQLiteDatabase mDB;
     FavouritesDbHelper dbHelper;
+    FloatingActionButton myFab;
 
     @Override
     protected void onDestroy() {
@@ -76,6 +78,17 @@ public class DetailActivity extends AppCompatActivity {
             }
 
         }
+
+        FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fav_button);
+
+        fab.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+
+                Log.v("CLICKED","");
+            }
+        });
+
         /*Give Functionality to Trailer Button*/
         BackgroundTask bgTask = new BackgroundTask(this, 1, id);
         bgTask.getProduct(new Response.Listener<JSONObject>() {
@@ -97,9 +110,10 @@ public class DetailActivity extends AppCompatActivity {
                 Log.d("ERROR", error.toString());
             }
         });
+
     }
 
-    @Override
+    /*@Override
     public boolean onCreateOptionsMenu(Menu menu) {
         MenuInflater inflater = getMenuInflater();
         inflater.inflate(R.menu.fav_menu, menu);
@@ -124,7 +138,7 @@ public class DetailActivity extends AppCompatActivity {
                 return super.onOptionsItemSelected(item);
         }
 
-    }
+    }*/
 
     private void deleteFav() {
         mDB.delete(Favourites.FavouritesList.TABLE_NAME, Favourites.FavouritesList.Movie_ID + "=" + id,
@@ -154,4 +168,7 @@ public class DetailActivity extends AppCompatActivity {
 
         }
     }
+
+
+
 }
